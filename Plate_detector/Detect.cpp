@@ -27,7 +27,8 @@ void Detect::run(uint input_type)
 				cap.read(frame);
 				process(frame);
 				display();
-				cv::waitKey(1);
+				if (cv::waitKey(10) == 27)
+					break;
 			}
 		}break;
 
@@ -124,6 +125,7 @@ bool Detect::check_data(uint input_type)
 		}
 		cv::Mat image=cv::imread(data_path);
 		if (image.empty()) {
+			std::cout << "ERROR: Photo could not load" << std::endl;
 			runnable = false;
 		}
 			
