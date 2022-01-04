@@ -154,11 +154,3 @@ Detect::Detect()
 Detect::~Detect()
 {
 }
-/*
-* To do
-* Adauga fisiere xml
-* adauga case 2 si 3
-* adauga funtiile de salvare rezultat
-*	testeaza
-* gata
-*/
