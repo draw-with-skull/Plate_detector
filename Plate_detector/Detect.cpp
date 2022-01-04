@@ -128,7 +128,7 @@ bool Detect::check_data(uint input_type)
 			std::cout << "ERROR: Photo could not load" << std::endl;
 			runnable = false;
 		}
-			
+		//add extention check
 		return runnable;
 	}break;
 	case VIDEO: {}break;
