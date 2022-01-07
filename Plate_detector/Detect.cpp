@@ -1,9 +1,10 @@
 #include "Detect.h"
 
+
 void Detect::run(uint input_type)
 {
 	//Input type PHOTO,VIDEO,WEBCAM
-	if (check_xml() || check_data(input_type)) {
+	if (check_xml() && check_data(input_type)) {
 		switch (input_type)
 		{
 		case 1: {
@@ -38,7 +39,7 @@ void Detect::run(uint input_type)
 		}
 	}
 	else
-		std::cout << "-----------------------------------------------\nAn error has occurred, no processing took place" << std::endl;
+		std::cout << "-----------------------------------------------\nAn error has occurred, no processing took place\n\n";
 
 }
 
@@ -60,11 +61,34 @@ void Detect::set_dispaly_Nsave(bool display_result, bool save_result, bool crop_
 
 void Detect::set_data_path(std::string& data_path)
 {
+	/*checks path*/
 	this->data_path = data_path;
 	if (this->data_path.empty()) {
 		std::cout << "ERROR: Data path is empty" << std::endl;
 		return;
 	}
+	/*checks extention*/
+	bool contains = false;
+	std::string path;
+	if (this->data_path.size() > 5)
+		path = this->data_path.substr(this->data_path.size() - 5, 5);
+	else
+		path = this->data_path;
+
+	if (path.find(".") != std::string::npos) {
+		for (uint i = 0; i < img_formats.size(); i++) {
+			if (path.find(img_formats[i]) == std::string::npos) {
+				contains = true;
+				break;
+			}
+		}
+
+		
+	}
+	else
+		std::cout << "ERROR: Data file extention missing\n";
+
+
 }
 
 void Detect::set_camera_id(uint camera_id) {
@@ -73,14 +97,18 @@ void Detect::set_camera_id(uint camera_id) {
 
 void Detect::set_xml_path(std::string& xml_path) {
 	this->xml_path = xml_path;
-
+	/*checks path*/
 	if (this->xml_path.empty()) {
 		std::cout << "ERROR: Xml path is empty" << std::endl;
 		return;
 	}
 
-	if (this->xml_path.find(".") != std::string::npos) {
-		if (this->xml_path.find(".xml") == std::string::npos)
+	/*checks the extention*/
+
+	std::string end_of_path = this->xml_path.substr(this->xml_path.length() - 4, 4);
+	
+	if (end_of_path.find(".") != std::string::npos) {
+		if (end_of_path.find(".xml") == std::string::npos)
 			std::cout << "ERROR: Extentions is wrong" << std::endl;
 	}
 	else {
@@ -99,37 +127,30 @@ void Detect::process(cv::Mat& frame)
 	classifier_cascade.detectMultiScale(frame_gray, obj_detected);
 }
 
-bool Detect::check_xml()
-{
-	bool runnable = true;
+bool Detect::check_xml(){
 	if (this->xml_path.empty()) {
 		std::cout << "ERROR: Xml path is empty" << std::endl;
 		return false;
 	}
 	if (!this->classifier_cascade.load(this->xml_path)) {
 		std::cout << "ERROR: unable to load xml file" << std::endl;
-		runnable = false;
+		return false;
 	}
-	return runnable;
+	return true;
 }
 
-bool Detect::check_data(uint input_type)
-{
+bool Detect::check_data(uint input_type){
 	switch (input_type)
 	{
 	case PHOTO: {
-		bool runnable = true;
 		if (this->data_path.empty()) {
 			std::cout << "ERROR: Photo path is empty" << std::endl;
 			return false;
 		}
-		cv::Mat image=cv::imread(data_path);
-		if (image.empty()) {
-			std::cout << "ERROR: Photo could not load" << std::endl;
-			runnable = false;
-		}
+
+		
 		//add extention check
-		return runnable;
+		return true;
 	}break;
 	case VIDEO: {}break;
 	case WEBCAM: {return true; }break;

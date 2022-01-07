@@ -32,7 +32,7 @@ private:
 	
 	//variables
 	std::vector<cv::Rect>obj_detected;
-	std::string xml_path, data_path;
+	std::string xml_path="\0", data_path="\0";
 	std::vector<std::string> img_formats = { ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".jpeg", ".jpg", ".jpe", ".jp2", ".tiff", ".tif", ".png"};
 	cv::CascadeClassifier classifier_cascade;
 	cv::Mat frame;
@@ -40,8 +40,6 @@ private:
 	uint camera_id = 0;
 	bool display_result = true, save_result = false, crop_result = false;
 	
-
-
 public:
 	//Constructors
 	Detect(std::string& xml_path, std::string& data_path);
