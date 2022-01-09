@@ -5,8 +5,8 @@ int main(int argc, char** argv) {
 	std::string data_path = "img1";
 
 	Detect detect(xml_path,data_path);
-	detect.run(PHOTO);
-	detect.display();
+	detect.run(WEBCAM);
+	//detect.display();
 	//printf("************************************************************************************************");
 	cv::waitKey(0);
 
