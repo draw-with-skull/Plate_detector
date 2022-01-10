@@ -20,11 +20,13 @@ void Detect::run(uint input_type)
 		case 2: {
 			/*Video*/
 			cv::VideoCapture cap(data_path);
-			while (true) {
-				cap.read(frame);
+			while(cap.read(frame)) {
 				process(frame);
-				display();
-				cv::waitKey(1);
+				if (display_content){
+					display_detected_area();
+				}
+				if (cv::waitKey(10) == 27)
+					break;
 			}
 
 		}break;
@@ -34,7 +36,9 @@ void Detect::run(uint input_type)
 			while (true) {
 				cap.read(frame);
 				process(frame);
-				display();
+				if (display_content) {
+					display_detected_area();
+				}
 				if (cv::waitKey(10) == 27)
 					break;
 			}
@@ -50,7 +54,7 @@ void Detect::run(uint input_type)
 
 }
 
-void Detect::display()
+void Detect::display_detected_area()
 {
 	/*Checks if any proccessing took place*/
 	if (!runnable) {
@@ -64,6 +68,27 @@ void Detect::display()
 	}
 	cv::imshow("display", frame);
 
+}
+
+void Detect::save()
+{
+	if (runnable) {
+		if (crop_result) {
+			for (uint i = 0; i < obj_detected.size(); i++) {
+				/*Creates the path*/
+				std::string output_path = "Output/";
+				output_path.append(std::to_string(i));
+				output_path.append(".png");
+
+				cv::Mat result = frame(obj_detected[i]);
+				cv::imwrite(output_path, result);
+				std::cout << std::endl << std::endl << std::endl << std::endl;
+			}
+		}
+	}
+	else{
+		std::cout << "ERROR: nothing to save\n";
+	}
 }
 
 void Detect::set_save_settings(bool save_result, bool crop_result) {
@@ -86,6 +111,10 @@ void Detect::set_data_path(std::string& data_path)
 void Detect::set_camera_id(uint camera_id) {
 	/*does it need a comment?*/
 	this->camera_id = camera_id;
+}
+
+void Detect::display(bool dispaly_content){
+	this->display_content = dispaly_content;
 }
 
 void Detect::set_xml_path(std::string& xml_path) {
@@ -122,6 +151,42 @@ void Detect::process(cv::Mat& frame)
 	classifier_cascade.detectMultiScale(frame_gray, obj_detected);
 }
 
+void Detect::set_settings_false()
+{
+	this->save_result = false;
+	this->crop_result = false;
+	this->runnable = false;
+	this->display_content = false;
+}
+
+bool Detect::check_extention(std::vector<std::string> formats)
+{
+	/*checks the lenght of the path*/
+	std::string path;
+	bool contains = false;
+	if (this->data_path.size() > 5)
+		path = this->data_path.substr(this->data_path.size() - 5, 5);
+	else
+		path = this->data_path;
+
+	/*checks the extention*/
+	if (path.find(".") != std::string::npos) {
+		for (uint i = 0; i < img_formats.size(); i++) {
+			if (path.find(img_formats[i]) != std::string::npos) {
+				contains = true;
+				return true;
+			}
+		}
+		if (!contains) {
+			std::cout << "ERROR: No extention found for the file\n";
+			return false;
+		}
+	}
+	else
+		std::cout << "ERROR: Data file extention missing\n";
+	return false;
+}
+
 bool Detect::check_xml() {
 	/*checks if the path is empty*/
 	if (this->xml_path.empty()) {
@@ -146,36 +211,23 @@ bool Detect::check_data(uint input_type) {
 			std::cout << "ERROR: Photo path is empty" << std::endl;
 			return false;
 		}
-		/*checks the lenght of the path*/
-		std::string path;
-		bool contains = false;
-		if (this->data_path.size() > 5)
-			path = this->data_path.substr(this->data_path.size() - 5, 5);
-		else
-			path = this->data_path;
-
-		/*checks the extention*/
-		if (path.find(".") != std::string::npos) {
-			for (uint i = 0; i < img_formats.size(); i++) {
-				if (path.find(img_formats[i]) != std::string::npos) {
-					contains = true;
-					return true;
-				}
-			}
-			if (!contains) {
-				std::cout << "ERROR: No extention found for the file\n";
-				return false;
-			}
-		}
-		else
-			std::cout << "ERROR: Data file extention missing\n";
-		return false;
+		/*check extention*/
+		return check_extention(this->img_formats);
 	}break;
-	case VIDEO: {}break;
+	case VIDEO: {
+		if (this->data_path.empty()) {
+			std::cout << "ERROR: Video path is empty";
+			return false;
+		}
+		/*check extention*/
+		return check_extention(this->video_formats);
+	}break;
+
+	/*Webcam*/
 	case WEBCAM: {return true; }break;
-	default:
-		break;
+	default:{return false; }break;
 	}
+	return false;
 }
 
 Detect::Detect(std::string& xml_path, std::string& data_path)
@@ -183,17 +235,22 @@ Detect::Detect(std::string& xml_path, std::string& data_path)
 	//Full Constructor
 	this->set_xml_path(xml_path);
 	this->set_data_path(data_path);
+	
+	this->set_settings_false();
 }
 
 Detect::Detect(std::string& xml_path)
 {
 	//xml data only
 	this->set_xml_path(xml_path);
+	
+	this->set_settings_false();
 }
 
 Detect::Detect()
 {
-	//Empty object
+	this->set_settings_false();
+	//settings
 }
 
 Detect::~Detect()
