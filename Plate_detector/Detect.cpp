@@ -73,18 +73,24 @@ void Detect::display_detected_area()
 void Detect::save()
 {
 	if (runnable) {
-		if (crop_result) {
-			for (uint i = 0; i < obj_detected.size(); i++) {
-				/*Creates the path*/
-				std::string output_path = "Output/";
-				output_path.append(std::to_string(i));
-				output_path.append(".png");
-
-				cv::Mat result = frame(obj_detected[i]);
+		cv::Mat result;
+		for (uint i = 0; i < obj_detected.size(); i++) {
+			/*Creates the path*/
+			std::string output_path = "Output/";
+			output_path.append(std::to_string(i));
+			output_path.append(".png");
+			/*Crops the image*/
+			if (crop_result)
+				result = frame(obj_detected[i]);
+			else
+				result = frame;
+			/*actual save*/
+			if(!result.empty())
 				cv::imwrite(output_path, result);
-				std::cout << std::endl << std::endl << std::endl << std::endl;
-			}
+			
 		}
+		
+
 	}
 	else{
 		std::cout << "ERROR: nothing to save\n";
