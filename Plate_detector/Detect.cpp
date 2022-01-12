@@ -25,8 +25,13 @@ void Detect::run(uint input_type)
 				if (display_content){
 					display_detected_area();
 				}
-				if (cv::waitKey(10) == 27)
+				/*close on escape*/
+				if (cv::waitKey(10) == 27) {
+					cv::destroyWindow("display");
 					break;
+				}
+				if (save_result)
+					save();
 			}
 
 		}break;
@@ -39,8 +44,13 @@ void Detect::run(uint input_type)
 				if (display_content) {
 					display_detected_area();
 				}
-				if (cv::waitKey(10) == 27)
+				/*close on escape*/
+				if (cv::waitKey(10) == 27) {
+					cv::destroyWindow("display");
 					break;
+				}
+				if (save_result)
+					save();
 			}
 		}break;
 
@@ -62,12 +72,12 @@ void Detect::display_detected_area()
 		return;
 	}
 	/*dispalys all objects detected*/
+	display_frame = frame;
 	for (uint i = 0; i < obj_detected.size(); i++)
 	{
-		cv::rectangle(frame, obj_detected[i].tl(), obj_detected[i].br(), cv::Scalar(255, 0, 0), 3);
+		cv::rectangle(display_frame, obj_detected[i].tl(), obj_detected[i].br(), cv::Scalar(255, 0, 0), 3);
 	}
-	cv::imshow("display", frame);
-
+	cv::imshow("display", display_frame);
 }
 
 void Detect::save()
@@ -77,7 +87,7 @@ void Detect::save()
 		for (uint i = 0; i < obj_detected.size(); i++) {
 			/*Creates the path*/
 			std::string output_path = "Output/";
-			output_path.append(std::to_string(i));
+			output_path.append(std::to_string(image_cout));
 			output_path.append(".png");
 			/*Crops the image*/
 			if (crop_result)
@@ -85,9 +95,10 @@ void Detect::save()
 			else
 				result = frame;
 			/*actual save*/
-			if(!result.empty())
+			if (!result.empty()) {
+				image_cout++;
 				cv::imwrite(output_path, result);
-			
+			}
 		}
 		
 
@@ -97,7 +108,7 @@ void Detect::save()
 	}
 }
 
-void Detect::set_save_settings(bool save_result, bool crop_result) {
+void Detect::set_save_settings(bool save_result, bool crop_result, bool save_all) {
 	/*setting for saving*/
 	this->save_result = save_result;
 	this->crop_result = crop_result;
@@ -163,6 +174,7 @@ void Detect::set_settings_false()
 	this->crop_result = false;
 	this->runnable = false;
 	this->display_content = false;
+	this->save_all = false;
 }
 
 bool Detect::check_extention(std::vector<std::string> formats)

@@ -5,9 +5,10 @@ int main(int argc, char** argv) {
 	std::string data_path = "img1.png";
 
 	Detect detect(xml_path,data_path);
-	detect.run(PHOTO);
-	detect.set_save_settings(true, true);
-	detect.save();
+	detect.display(true);
+	detect.set_save_settings(true, true, true);
+	detect.run(WEBCAM);
+	//detect.save();
 	//printf("************************************************************************************************");
 	cv::waitKey(0);
 
