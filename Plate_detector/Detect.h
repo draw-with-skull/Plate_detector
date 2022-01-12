@@ -17,7 +17,7 @@ public:
 	void run(uint input_type);
 	void display_detected_area();
 	void save();
-	void set_save_settings(bool save_result, bool crop_result);
+	void set_save_settings(bool save_result, bool crop_result, bool save_all);
 	void set_xml_path(std::string& xml_path);
 	void set_data_path(std::string& data_path);
 	void set_camera_id(uint camera_id);
@@ -38,11 +38,13 @@ private:
 	std::string xml_path = "\0", data_path = "\0";
 	std::vector<std::string> img_formats = { ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".jpeg", ".jpg", ".jpe", ".jp2", ".tiff", ".tif", ".png" };
 	std::vector<std::string> video_formats = { ".mp4" };
-	cv::CascadeClassifier classifier_cascade;
-	cv::Mat frame;
 
+	cv::CascadeClassifier classifier_cascade;
+	cv::Mat frame, display_frame;
+	
 	uint camera_id = 0;
-	bool save_result, crop_result, runnable, display_content;
+	uint image_cout = 0;
+	bool save_result, crop_result, runnable, display_content, save_all;
 
 public:
 	//Constructors
